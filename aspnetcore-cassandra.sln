@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.176
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aspnetcore-cassandra", "aspnetcore-cassandra\aspnetcore-cassandra.csproj", "{20C37B14-3679-4642-BE3A-F032C23B9C82}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{20C37B14-3679-4642-BE3A-F032C23B9C82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20C37B14-3679-4642-BE3A-F032C23B9C82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20C37B14-3679-4642-BE3A-F032C23B9C82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20C37B14-3679-4642-BE3A-F032C23B9C82}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F0603B7C-7B40-48DD-A862-3E1099BF8090}
+	EndGlobalSection
+EndGlobal
