@@ -60,10 +60,10 @@ namespace aspnetcore_cassandra
         private static CosmosDbService InitializeCosmosClientInstance()
         {
 
-            string username = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_MYCONN_USERNAME");
-            string password = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_MYCONN_PASSWORD");
-            string contactPoints = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_MYCONN_CONTACT_POINT");
-            int port = int.Parse(Environment.GetEnvironmentVariable("RESOURCECONNECTOR_MYCONN_PORT"));
+            string username = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_USERNAME");
+            string password = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_PASSWORD");
+            string contactPoints = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_CONTACTPOINT");
+            int port = int.Parse(Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_PORT"));
 
             CosmosDbService cosmosDbService = new CosmosDbService(
                 username,
