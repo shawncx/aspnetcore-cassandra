@@ -1,11 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using aspnetcore_cassandra.Services;
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.Azure.Management.CosmosDB.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,6 +19,11 @@ namespace aspnetcore_cassandra
 {
     public class Startup
     {
+        private const string CassandraUsernameConnectionStringKey = "Username";
+        private const string CassandraPasswordConnectionStringKey = "Password";
+        private const string CassandraContactPointConnectionStringKey = "HostName";
+        private const string CassandraPortConnectionStringKey = "Port";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -59,11 +69,36 @@ namespace aspnetcore_cassandra
 
         private static CosmosDbService InitializeCosmosClientInstance()
         {
+            string subscriptionId = "937bc588-a144-4083-8612-5f9ffbbddb14";
+            string resourceGroupName = "servicelinker-test-win-group";
+            string accountName = "servicelinker-cassandra-cosmos";
 
-            string username = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_USERNAME");
-            string password = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_PASSWORD");
-            string contactPoints = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_CONTACTPOINT");
-            int port = int.Parse(Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTCASSANDRASECRETCONNECTIONSUCCEEDED_PORT"));
+            string resourceEndpoint = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_RESOURCEENDPOINT");
+            string scope = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_SCOPE");
+
+            string accessToken = GetAccessTokenByMsIdentity(scope);
+
+            string endpoint = $"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/listConnectionStrings?api-version=2019-12-12";
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            HttpResponseMessage result = httpClient.PostAsync(endpoint, new StringContent("")).Result;
+            DatabaseAccountListConnectionStringsResult connStrResult = result.Content.ReadAsAsync<DatabaseAccountListConnectionStringsResult>().Result;
+
+            string connectionString = string.Empty;
+            foreach (DatabaseAccountConnectionString connStr in connStrResult.ConnectionStrings)
+            {
+                if (connStr.Description.Contains("Primary") && connStr.Description.Contains("Cassandra"))
+                {
+                    connectionString = connStr.ConnectionString;
+                }
+            }
+
+            IDictionary<string, string> connStrDict = ParseConnectionString(connectionString);
+            string username = connStrDict[CassandraUsernameConnectionStringKey];
+            string password = connStrDict[CassandraPasswordConnectionStringKey];
+            string contactPoints = connStrDict[CassandraContactPointConnectionStringKey];
+            int port = int.Parse(connStrDict[CassandraPortConnectionStringKey]);
 
             CosmosDbService cosmosDbService = new CosmosDbService(
                 username,
@@ -71,6 +106,32 @@ namespace aspnetcore_cassandra
                 contactPoints,
                 port);
             return cosmosDbService;
+        }
+
+        private static string GetAccessTokenByMsIdentity(string scope)
+        {
+            ManagedIdentityCredential cred = new ManagedIdentityCredential();
+            TokenRequestContext reqContext = new TokenRequestContext(new string[] { scope });
+            AccessToken token = cred.GetTokenAsync(reqContext).Result;
+            return token.Token;
+        }
+
+        private static IDictionary<string, string> ParseConnectionString(string connectionString)
+        {
+            // connection string is in format: HostName={hostname};Username={username};Password={password};Port={port}
+            IDictionary<string, string> dict = new Dictionary<string, string>();
+            foreach (string seg in connectionString.Split(";"))
+            {
+                int index = seg.IndexOf("=");
+                if (index < 0)
+                {
+                    continue;
+                }
+                string key = seg.Substring(0, index);
+                string value = seg.Substring(index + 1);
+                dict.Add(key, value);
+            }
+            return dict;
         }
     }
 }
