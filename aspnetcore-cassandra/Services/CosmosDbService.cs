@@ -10,8 +10,9 @@ namespace aspnetcore_cassandra.Services
     public class CosmosDbService : ICosmosDbService
     {
         private Cluster _cluster;
+        private string _keyspace;
 
-        public CosmosDbService(string username, string password, string contactPoints, int port)
+        public CosmosDbService(string username, string password, string contactPoints, int port, string keyspace)
         {
             SSLOptions options = new SSLOptions(SslProtocols.Tls12, true, (sender, certificate, chain, sslPolicyErrors) => true);
             options.SetHostNameResolver((ipAddress) => contactPoints);
@@ -22,6 +23,7 @@ namespace aspnetcore_cassandra.Services
                 .AddContactPoint(contactPoints)
                 .WithSSL(options)
                 .Build();
+            this._keyspace = keyspace;
         }
 
         //public async Task AddItemAsync(MyItem item)
@@ -50,7 +52,7 @@ namespace aspnetcore_cassandra.Services
 
         public async Task<IEnumerable<MyItem>> GetItemsAsync()
         {
-            ISession session = await _cluster.ConnectAsync("coredb").ConfigureAwait(false);
+            ISession session = await _cluster.ConnectAsync(this._keyspace).ConfigureAwait(false);
             IMapper mapper = new Mapper(session);
             try
             {

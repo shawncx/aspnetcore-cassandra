@@ -69,20 +69,17 @@ namespace aspnetcore_cassandra
 
         private static CosmosDbService InitializeCosmosClientInstance()
         {
-            string subscriptionId = "937bc588-a144-4083-8612-5f9ffbbddb14";
-            string resourceGroupName = "servicelinker-test-win-group";
-            string accountName = "servicelinker-cassandra-cosmos";
-
             string resourceEndpoint = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_RESOURCEENDPOINT");
             string scope = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_SCOPE");
+            string connUrl = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_CONNECTIONSTRINGURL");
+            string keyspace = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_KEYSPACE");
 
             string accessToken = GetAccessTokenByMsIdentity(scope);
 
-            string endpoint = $"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/listConnectionStrings?api-version=2019-12-12";
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            HttpResponseMessage result = httpClient.PostAsync(endpoint, new StringContent("")).Result;
+            HttpResponseMessage result = httpClient.PostAsync(connUrl, new StringContent("")).Result;
             DatabaseAccountListConnectionStringsResult connStrResult = result.Content.ReadAsAsync<DatabaseAccountListConnectionStringsResult>().Result;
 
             string connectionString = string.Empty;
@@ -104,7 +101,8 @@ namespace aspnetcore_cassandra
                 username,
                 password,
                 contactPoints,
-                port);
+                port,
+                keyspace);
             return cosmosDbService;
         }
 
