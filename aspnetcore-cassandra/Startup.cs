@@ -62,7 +62,7 @@ namespace aspnetcore_cassandra
         private static CosmosDbService InitializeCosmosClientInstance()
         {
             string scope = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_SCOPE");
-            string connUrl = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_CONNECTIONSTRINGURL");
+            string listKeyUrl = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_LISTKEYURL");
             string keyspace = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_KEYSPACE");
 
             string accessToken = GetAccessTokenByMsIdentity(scope);
@@ -70,7 +70,7 @@ namespace aspnetcore_cassandra
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            HttpResponseMessage result = httpClient.PostAsync(connUrl, new StringContent("")).Result;
+            HttpResponseMessage result = httpClient.PostAsync(listKeyUrl, new StringContent("")).Result;
             DatabaseAccountListKeysResult connStrResult = result.Content.ReadAsAsync<DatabaseAccountListKeysResult>().Result;
 
             string username = Environment.GetEnvironmentVariable("RESOURCECONNECTOR_TESTWEBAPPSYSTEMASSIGNEDIDENTITYCONNECTIONSUCCEEDED_USERNAME");
